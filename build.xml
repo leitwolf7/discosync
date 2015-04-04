@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- Build file for DiscoSync                                          -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<project name="DiscoSync" default="main" basedir=".">
+
+  <!-- Name of the distribution zip file to create -->
+  <property name="zipName" value="DiscoSync.zip"/>
+
+  <!-- Give user a chance to override without editing this file -->
+  <property file=".ant.properties" />
+  <property file="${user.home}/.ant.properties" />
+
+  <!-- Don't use systems CLASSPATH, use only the CLASSPATH set in this build file -->
+  <property name="build.sysclasspath" value="ignore"/>
+
+  <!--  General project properties -->
+  <property name="Name" value="DiscoSync"/>
+  <property name="jarName" value="DiscoSync.jar"/>
+
+  <!--  javac compiler options -->
+  <property name="debug" value="true" />
+  <property name="deprecation" value="true" />
+  <property name="optimize" value="true" />
+
+  <!--  Set the properties related to the source tree -->
+  <property name="src.dir" value="source"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="bin.dir" value="bin"/>
+  
+  <path id="classpath">
+    <pathelement location="${lib.dir}/commons-io-2.4.jar"/>
+    <pathelement location="${lib.dir}/commons-cli-1.2.jar"/>
+  </path>
+
+
+  <!--  Set the properties for the build area  -->
+  <property name="build.dir" value="build"/>
+  <property name="build.classes" value="${build.dir}/classes"/>
+
+  <!--  Set up properties for the distribution area -->
+  <property name="dist.dir" value="${build.dir}/dist"/>
+
+  <!--  Specify logfile name -->
+  <property name="logfilename" value="build.log"/>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!--  Build the code                                                   -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <target name="build"
+          description="--> compile">
+    <delete includeEmptyDirs="true" quiet="true" dir="${build.classes}"/>
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.classes}"/>
+
+    <javac srcdir="${src.dir}"
+           destdir="${build.classes}"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}" 
+           target="1.7"
+           source="1.7">
+           <classpath refid="classpath" />
+    </javac>
+
+  </target>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!--  Create the jar file                                              -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <target name="jar"
+          depends="build"
+          description="--> create jar file">
+
+    <delete includeEmptyDirs="true" quiet="true" dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+    
+    <!--  Build the jar file.  -->
+    <jar jarfile="${dist.dir}/${jarName}">
+      <fileset dir="${build.classes}">
+        <include name="**/*.class"/>
+        <include name="**/*.mf"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="org.discosync.DiscoSync"/>
+        <attribute name="Class-Path" value="commons-io-2.4.jar commons-cli-1.2.jar hsqldb.jar"/>
+      </manifest>
+    </jar>
+
+  </target>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- Copy remaining files to dist directory -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <target name="distribution"
+          depends="jar"
+          description="--> copy bin files dist directory.">
+
+    <copy todir="${dist.dir}" >
+      <fileset dir="${bin.dir}"/>
+      <fileset dir="${lib.dir}"/>
+    </copy>
+
+    <!-- Set eol format of delivered files -->
+    <fixcrlf eol="dos" srcdir="${dist.dir}" encoding="ISO-8859-1" includes="**/*.bat,**/*.txt,**/*.job,**/*.ini" />
+    <fixcrlf eol="unix" srcdir="${dist.dir}" encoding="ISO-8859-1" includes="**/*.sh" />
+
+    <!-- Create the distribution zip file -->
+    <zip basedir="${dist.dir}" destfile="${build.dir}/${zipName}"/>
+
+  </target>
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- Main target - runs dist by default -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <target name="main" description="--> main target">
+
+    <record name="${logfilename}" action="start"/>
+
+    <antcall target="distribution"/>
+    <!-- Finally delete the classes directory -->
+    <delete quiet="true" dir="${build.classes}"/>
+
+    <record name="${logfilename}" action="stop"/>
+
+  </target>
+
+</project>
