@@ -1,7 +1,7 @@
 # discosync
 One-way synchronization tool to keep disconnected sites in sync, written in Java.
 
-## Usage szenario
+## Usage scenario
 You have a large collection of pictures from your little family. You never would absorb a loss of them, so you decide to keep a backup on the computer of your parents.
 So how can DiscoSync help you in this situation? What to do?
 * One-time hard work - transfer a complete copy of your collection to your parents.
