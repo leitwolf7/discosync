@@ -122,34 +122,5 @@ public class DiscoSync {
         long dura = System.currentTimeMillis() - start;
         System.out.println("Duration: "+(dura/1000)+" seconds");
         System.out.println("Ready.");
-        
-//        List<FileListEntry> fileOperations;
-//        
-//        createSyncInfo("c:\\#\\1", "c:\\#\\sync-1");
-//        createSyncInfo("c:\\#\\2", "c:\\#\\sync-2");
-//        
-//        fileOperations = compareSyncInfo("c:\\#\\sync-2", "c:\\#\\sync-1");
-//        Utils.showSyncResult(fileOperations, true);
-//
-//        fileOperations = compareSyncInfoAndFiles("c:\\#\\2", "c:\\#\\sync-1");
-//        Utils.showSyncResult(fileOperations, true);
-//        
-//        // syncPack to make 1 like 2
-//        createSyncPack("c:\\#\\2", fileOperations, "C:\\#\\syncpack-2-to-1");
-//
-//        applySyncPack("C:\\#\\syncpack-2-to-1", "c:\\#\\1-apply");
-//
-//        // -------------------------
-//        
-//        fileOperations = compareSyncInfo("c:\\#\\sync-1", "c:\\#\\sync-2");
-//        Utils.showSyncResult(fileOperations, true);
-//
-//        fileOperations = compareSyncInfoAndFiles("c:\\#\\1", "c:\\#\\sync-2");
-//        Utils.showSyncResult(fileOperations, true);
-//        
-//        // syncPack to make 2 like 1
-//        createSyncPack("c:\\#\\1", fileOperations, "C:\\#\\syncpack-1-to-2");
-//        
-//        applySyncPack("C:\\#\\syncpack-1-to-2", "c:\\#\\2-apply");
     }
 }
