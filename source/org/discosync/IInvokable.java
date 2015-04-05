@@ -24,6 +24,9 @@ import java.sql.SQLException;
 
 import org.apache.commons.cli.CommandLine;
 
+/**
+ * Interface for classes implementing a specific command provided on the command line.
+ */
 public interface IInvokable {
     
     public boolean invoke(CommandLine cmd) throws SQLException, IOException;
