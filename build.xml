@@ -99,6 +99,7 @@
     <copy todir="${dist.dir}" >
       <fileset dir="${bin.dir}"/>
       <fileset dir="${lib.dir}"/>
+      <fileset file="README.md"/>
     </copy>
 
     <!-- Set eol format of delivered files -->
