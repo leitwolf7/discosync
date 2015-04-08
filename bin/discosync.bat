@@ -1,2 +1,2 @@
 @echo off
-java -jar DiscoSync.jar %*
+java -jar %~dp0\DiscoSync.jar %*

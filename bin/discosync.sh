@@ -1,2 +1,2 @@
 #! /bin/sh
-java -jar DiscoSync.jar $*
+java -jar "`dirname "$0"`"/DiscoSync.jar $*
