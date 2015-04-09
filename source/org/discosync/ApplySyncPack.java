@@ -49,7 +49,7 @@ public class ApplySyncPack implements IInvokable {
         }
         
         String syncPackDir = cmd.getOptionValue("syncpack");
-        String targetDir = cmd.getOptionValue("targetdir");
+        String targetDir = cmd.getOptionValue("basedir");
         
         applySyncPack(syncPackDir, targetDir);
         
