@@ -87,6 +87,5 @@ public class FileCreateSyncInfoScanner extends DirectoryWalker {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        // System.out.println("File: "+relativeName+"; checksum="+checksum+"; size="+size);
     }
 }
