@@ -52,6 +52,16 @@ public class FileCreateSyncInfoScanner extends DirectoryWalker {
     }
 
     protected boolean handleDirectory(File directory, int depth, Collection results) {
+        
+        // remove baseDir part
+        String relativeName = directory.getAbsolutePath().substring(baseDirLength);
+
+        try {
+            database.insertDirectory(relativeName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
         return true;
     }
 

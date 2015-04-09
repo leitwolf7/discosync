@@ -73,7 +73,9 @@ public class FileOperationDatabase {
         
         String sqlCreate = "CREATE TABLE IF NOT EXISTS fileoperation "
                 + "  (filepath        VARCHAR(265),"
+                + "   isdirectory     BOOLEAN,"
                 + "   size            BIGINT,"
+                + "   oldchecksum     BIGINT," // checksum of the file to be replaced
                 + "   operation       VARCHAR(16))";
 
         stmt.execute(sqlCreate);
@@ -83,9 +85,18 @@ public class FileOperationDatabase {
         PreparedStatement insertStmt = getInsertStatement();
         for (FileListEntry e : fileOperations) {
             insertStmt.setObject(1, e.getPath());
-            insertStmt.setObject(2, e.getSize());
-            insertStmt.setObject(3, e.getOperation().toString());
-            insertStmt.executeUpdate();
+            if (e.isDirectory()) {
+                insertStmt.setObject(2, Boolean.TRUE);
+                insertStmt.setObject(3, 0L);
+                insertStmt.setObject(4, 0L);
+                insertStmt.setObject(5, e.getOperation().toString());
+            } else {
+                insertStmt.setObject(2, Boolean.FALSE);
+                insertStmt.setObject(3, e.getSize());
+                insertStmt.setObject(4, e.getChecksum());
+                insertStmt.setObject(5, e.getOperation().toString());
+                insertStmt.executeUpdate();
+            }
         }
     }
     
@@ -103,7 +114,7 @@ public class FileOperationDatabase {
             String path = rs.getString(1);
             long size = rs.getLong(2);
             FileOperations op = FileOperations.valueOf(rs.getString(3));
-            FileListEntry e = new FileListEntry(path, 0L, size);
+            FileListEntry e = new FileListEntry(path, 0L, size); // FIXME retrieve correct infos
             e.setOperation(op);
             fileList.add(e);
         }
