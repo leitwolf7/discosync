@@ -35,21 +35,40 @@ public class Utils {
         
         FileListEntry dstEntry = dstFileMap.get(srcEntry.getPath());
         
-        if (dstEntry != null) {
-            // file exists in dest, check size, ckSum
-            if (srcEntry.getSize() == dstEntry.getSize() && srcEntry.getChecksum() == dstEntry.getChecksum()) {
-                // file exists in dest, KEEP
+        if (srcEntry.isDirectory()) {
+            
+            if (dstEntry != null) {
+                // exists on target - is it a directory?
+                if (dstEntry.isDirectory()) {
+                    // yes, already exists on target - KEEP
+                } else {
+                    // dir exists on target, but is a FILE ! FIXME Remove file, create directory!
+                    System.out.println("Internal Error: file name same as a directory name!");
+                }
             } else {
-                // file exists, but is different -> REPLACE
-                srcEntry.setOperation(FileOperations.REPLACE);
+                // dir does not exist on target - CREATE
+                srcEntry.setOperation(FileOperations.COPY);
                 fileOperations.add(srcEntry);
             }
-            // remove processed entry
-            dstFileMap.remove(dstEntry.getPath());
+            
         } else {
-            // file is missing in dest -> copy
-            srcEntry.setOperation(FileOperations.COPY);
-            fileOperations.add(srcEntry);
+            
+            if (dstEntry != null) {
+                // file exists in dest, check size, ckSum
+                if (srcEntry.getSize() == dstEntry.getSize() && srcEntry.getChecksum() == dstEntry.getChecksum()) {
+                    // file exists in dest, KEEP
+                } else {
+                    // file exists, but is different -> REPLACE
+                    srcEntry.setOperation(FileOperations.REPLACE);
+                    fileOperations.add(srcEntry);
+                }
+                // remove processed entry
+                dstFileMap.remove(dstEntry.getPath());
+            } else {
+                // file is missing in dest -> copy
+                srcEntry.setOperation(FileOperations.COPY);
+                fileOperations.add(srcEntry);
+            }
         }
     }
 

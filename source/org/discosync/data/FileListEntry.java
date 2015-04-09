@@ -24,12 +24,31 @@ package org.discosync.data;
  */
 public class FileListEntry {
     protected String path;
+    protected boolean isDirectory;
     protected long checksum; 
     protected long size;
     protected FileOperations operation = FileOperations.KEEP;
-    
+
+    /**
+     * Create a new entry for a DIRECTORY.
+     * @param path
+     */
+    public FileListEntry(String path) {
+        this.path = path;
+        this.isDirectory = true;
+        this.checksum = 0;
+        this.size = 0;
+    }
+
+    /**
+     * Create a new entry for a FILE.
+     * @param path
+     * @param checksum
+     * @param size
+     */
     public FileListEntry(String path, long checksum, long size) {
         this.path = path;
+        this.isDirectory = false;
         this.checksum = checksum;
         this.size = size;
     }
@@ -55,5 +74,9 @@ public class FileListEntry {
     
     public String toString() {
         return operation.toString() + ": " + path;
+    }
+
+    public boolean isDirectory() {
+        return isDirectory;
     }
 }

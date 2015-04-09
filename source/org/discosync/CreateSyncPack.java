@@ -112,5 +112,4 @@ public class CreateSyncPack implements IInvokable {
             Files.copy(sourcePath, targetPath);
         }
     }
-
 }

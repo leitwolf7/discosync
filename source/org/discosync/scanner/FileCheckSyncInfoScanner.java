@@ -56,6 +56,14 @@ public class FileCheckSyncInfoScanner extends DirectoryWalker {
     }
 
     protected boolean handleDirectory(File directory, int depth, Collection results) {
+        
+        // remove baseDir part
+        String relativeName = directory.getAbsolutePath().substring(baseDirLength);
+        
+        FileListEntry e = new FileListEntry(relativeName);
+        
+        Utils.doFileListEntryCompare(e, dstFileMap, fileOperations);
+        
         return true;
     }
 
@@ -68,7 +76,7 @@ public class FileCheckSyncInfoScanner extends DirectoryWalker {
         
         // check if we can avoid to generate the checksum
         FileListEntry dstEntry = dstFileMap.get(relativeName);
-
+// FIXME: always create checksum to be able to compare
         if (dstEntry != null) {
             // file exists in dest, check size, ckSum
             if (size != dstEntry.getSize()) {
