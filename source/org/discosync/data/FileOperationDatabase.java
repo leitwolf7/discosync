@@ -31,7 +31,21 @@ public class FileOperationDatabase {
     protected Connection conn;
     protected Statement stmt;
     protected PreparedStatement insertStatement = null;
-
+    
+    protected final String SQL_DROP = "DROP TABLE fileoperation IF EXISTS";
+    
+    protected final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS fileoperation "
+            + "  (filepath        VARCHAR(265),"
+            + "   isdirectory     BOOLEAN,"
+            + "   size            BIGINT,"
+            + "   oldchecksum     BIGINT," // checksum of the file to be replaced
+            + "   operation       VARCHAR(16))";
+    
+    protected final String SQL_INSERT = "INSERT INTO fileoperation "
+    		+ "(filepath,isdirectory,size,oldchecksum,operation) VALUES (?,?,?,?,?)";
+    
+    protected final String SQL_SELECT = "SELECT filepath,isdirectory,size,oldchecksum,operation FROM fileoperation";
+    
     public FileOperationDatabase(String name) {
         this.name = name;
     }
@@ -67,18 +81,8 @@ public class FileOperationDatabase {
     }
     
     public void createFileOperationTable() throws SQLException {
-        String sqlDrop = "DROP TABLE fileoperation IF EXISTS";
-        
-        stmt.execute(sqlDrop);
-        
-        String sqlCreate = "CREATE TABLE IF NOT EXISTS fileoperation "
-                + "  (filepath        VARCHAR(265),"
-                + "   isdirectory     BOOLEAN,"
-                + "   size            BIGINT,"
-                + "   oldchecksum     BIGINT," // checksum of the file to be replaced
-                + "   operation       VARCHAR(16))";
-
-        stmt.execute(sqlCreate);
+        stmt.execute(SQL_DROP);
+        stmt.execute(SQL_CREATE);
     }
     
     public void insertFileOperations(List<FileListEntry> fileOperations) throws SQLException {
@@ -102,20 +106,16 @@ public class FileOperationDatabase {
     
     private PreparedStatement getInsertStatement() throws SQLException {
         if (insertStatement == null) {
-            insertStatement = stmt.getConnection().prepareStatement("INSERT INTO fileoperation (filepath,size,operation) VALUES (?,?,?)");
+            insertStatement = stmt.getConnection().prepareStatement(SQL_INSERT);
         }
         return insertStatement;
     }
 
     public List<FileListEntry> retrieveFileOperations() throws SQLException {
         List<FileListEntry> fileList = new ArrayList<>();
-        ResultSet rs = stmt.executeQuery("SELECT filepath,size,operation FROM fileoperation");
+        ResultSet rs = stmt.executeQuery(SQL_SELECT);
         while (rs.next()) {
-            String path = rs.getString(1);
-            long size = rs.getLong(2);
-            FileOperations op = FileOperations.valueOf(rs.getString(3));
-            FileListEntry e = new FileListEntry(path, 0L, size); // FIXME retrieve correct infos
-            e.setOperation(op);
+        	FileListEntry e = createFileListEntry(rs);
             fileList.add(e);
         }
         rs.close();
@@ -123,8 +123,25 @@ public class FileOperationDatabase {
         return fileList;
     }
     
+    protected FileListEntry createFileListEntry(ResultSet rs) throws SQLException {
+        final FileListEntry e;
+        
+        String path = rs.getString(1);
+        boolean isDirectory = rs.getBoolean(2);
+        if (isDirectory) {
+            e = new FileListEntry(path);
+        } else {
+            long oldchecksum = rs.getLong(3);
+            long size = rs.getLong(4);
+            e = new FileListEntry(path, oldchecksum, size);
+        }
+        FileOperations op = FileOperations.valueOf(rs.getString(5));
+        e.setOperation(op);
+        return e;
+    }
+    
     public Iterator<FileListEntry> getFileListOperationIterator() throws SQLException {
-        ResultSet rs = stmt.executeQuery("SELECT filepath,size,operation FROM fileoperation");
+        ResultSet rs = stmt.executeQuery(SQL_SELECT);
         FileListEntryIterator it = new FileListEntryIterator(rs);
         return it;
     }
@@ -149,11 +166,7 @@ public class FileOperationDatabase {
         public FileListEntry next() {
             FileListEntry entry = null;
             try {
-                String path = resultSet.getString(1);
-                long size = resultSet.getLong(2);
-                FileOperations op = FileOperations.valueOf(resultSet.getString(3));
-                entry = new FileListEntry(path, 0L, size);
-                entry.setOperation(op);
+            	entry = createFileListEntry(resultSet);
             } catch(SQLException ex) {
                 ex.printStackTrace();
             }
