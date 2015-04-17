@@ -100,6 +100,11 @@ public class CreateSyncPack implements IInvokable {
                 continue;
             }
             
+            // don't copy directories that should be created on target
+            if (e.isDirectory()) {
+                continue;
+            }
+            
             String path = e.getPath();
 
             Path sourcePath = FileSystems.getDefault().getPath(baseDir, path);
