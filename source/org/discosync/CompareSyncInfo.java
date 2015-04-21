@@ -67,6 +67,7 @@ public class CompareSyncInfo implements IInvokable {
 
             System.out.println("Compare target syncinfo '"+targetSyncInfo+"' to directory '"+basedir+"'.");
 
+            System.out.println("Scanning directory ...");
             fileOperations = compareSyncInfoAndFiles(basedir, targetSyncInfo);
         }
 

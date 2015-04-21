@@ -53,6 +53,7 @@ public class ApplySyncPack implements IInvokable {
 
         System.out.println("Apply syncpack '"+syncPackDir+"' to directory '"+targetDir+"'.");
 
+        System.out.println("Applying syncpack ...");
         applySyncPack(syncPackDir, targetDir);
 
         return true;
