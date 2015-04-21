@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -26,26 +26,26 @@ import java.util.*;
  * Created on 01.04.2015
  */
 public class FileOperationDatabase {
-    
+
     protected String name;
     protected Connection conn;
     protected Statement stmt;
     protected PreparedStatement insertStatement = null;
-    
+
     protected final String SQL_DROP = "DROP TABLE fileoperation IF EXISTS";
-    
+
     protected final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS fileoperation "
             + "  (filepath        VARCHAR(265),"
             + "   isdirectory     BOOLEAN,"
             + "   size            BIGINT,"
             + "   oldchecksum     BIGINT," // checksum of the file to be replaced
             + "   operation       VARCHAR(16))";
-    
+
     protected final String SQL_INSERT = "INSERT INTO fileoperation "
-    		+ "(filepath,isdirectory,size,oldchecksum,operation) VALUES (?,?,?,?,?)";
-    
+            + "(filepath,isdirectory,size,oldchecksum,operation) VALUES (?,?,?,?,?)";
+
     protected final String SQL_SELECT = "SELECT filepath,isdirectory,size,oldchecksum,operation FROM fileoperation";
-    
+
     public FileOperationDatabase(String name) {
         this.name = name;
     }
@@ -62,7 +62,7 @@ public class FileOperationDatabase {
         conn = DriverManager.getConnection("jdbc:hsqldb:file:"+name+";shutdown=true", "SA", "");
         stmt = conn.createStatement();
     }
-    
+
     public void close() {
         if (insertStatement != null) {
             try {
@@ -79,12 +79,12 @@ public class FileOperationDatabase {
         } catch (SQLException e) {
         }
     }
-    
+
     public void createFileOperationTable() throws SQLException {
         stmt.execute(SQL_DROP);
         stmt.execute(SQL_CREATE);
     }
-    
+
     public void insertFileOperations(List<FileListEntry> fileOperations) throws SQLException {
         PreparedStatement insertStmt = getInsertStatement();
         for (FileListEntry e : fileOperations) {
@@ -99,11 +99,11 @@ public class FileOperationDatabase {
                 insertStmt.setObject(3, e.getSize());
                 insertStmt.setObject(4, e.getChecksum());
                 insertStmt.setObject(5, e.getOperation().toString());
-                insertStmt.executeUpdate();
             }
+            insertStmt.executeUpdate();
         }
     }
-    
+
     private PreparedStatement getInsertStatement() throws SQLException {
         if (insertStatement == null) {
             insertStatement = stmt.getConnection().prepareStatement(SQL_INSERT);
@@ -115,42 +115,42 @@ public class FileOperationDatabase {
         List<FileListEntry> fileList = new ArrayList<>();
         ResultSet rs = stmt.executeQuery(SQL_SELECT);
         while (rs.next()) {
-        	FileListEntry e = createFileListEntry(rs);
+            FileListEntry e = createFileListEntry(rs);
             fileList.add(e);
         }
         rs.close();
 
         return fileList;
     }
-    
+
     protected FileListEntry createFileListEntry(ResultSet rs) throws SQLException {
         final FileListEntry e;
-        
+
         String path = rs.getString(1);
         boolean isDirectory = rs.getBoolean(2);
         if (isDirectory) {
             e = new FileListEntry(path);
         } else {
-            long oldchecksum = rs.getLong(3);
-            long size = rs.getLong(4);
+            long size = rs.getLong(3);
+            long oldchecksum = rs.getLong(4);
             e = new FileListEntry(path, oldchecksum, size);
         }
         FileOperations op = FileOperations.valueOf(rs.getString(5));
         e.setOperation(op);
         return e;
     }
-    
+
     public Iterator<FileListEntry> getFileListOperationIterator() throws SQLException {
         ResultSet rs = stmt.executeQuery(SQL_SELECT);
         FileListEntryIterator it = new FileListEntryIterator(rs);
         return it;
     }
-    
+
     protected class FileListEntryIterator implements Iterator<FileListEntry> {
-        
+
         protected ResultSet resultSet;
         protected boolean hasNext;
-        
+
         public FileListEntryIterator(ResultSet rs) throws SQLException {
             resultSet = rs;
             // pos to first entry
@@ -166,18 +166,18 @@ public class FileOperationDatabase {
         public FileListEntry next() {
             FileListEntry entry = null;
             try {
-            	entry = createFileListEntry(resultSet);
+                entry = createFileListEntry(resultSet);
             } catch(SQLException ex) {
                 ex.printStackTrace();
             }
-            
+
             // pos to next
             try {
                 hasNext = resultSet.next();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            
+
             return entry;
         }
 
