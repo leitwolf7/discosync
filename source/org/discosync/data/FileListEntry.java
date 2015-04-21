@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ package org.discosync.data;
 public class FileListEntry {
     protected String path;
     protected boolean isDirectory;
-    protected long checksum; 
+    protected long checksum;
     protected long size;
     protected FileOperations operation = FileOperations.KEEP;
 
@@ -64,16 +64,17 @@ public class FileListEntry {
     public long getSize() {
         return size;
     }
-    
+
     public FileOperations getOperation() {
         return operation;
     }
     public void setOperation(FileOperations op) {
         operation = op;
     }
-    
+
+    @Override
     public String toString() {
-        return operation.toString() + ": " + path;
+        return operation.toPadString() + ": " + path;
     }
 
     public boolean isDirectory() {

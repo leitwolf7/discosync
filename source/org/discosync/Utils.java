@@ -128,21 +128,46 @@ public class Utils {
      * @param verbose when true each operation is printed
      */
     public static void showSyncResult(List<FileListEntry> fileOperations, boolean verbose) {
-        long copySize = 0;
-        long deleteSize = 0;
-        System.out.println("Operations: "+String.format("%,d", fileOperations.size()));
+
+        long copySize = 0L;
+        long deleteSize = 0L;
+        int filesToCopy = 0;
+        int filesToReplace = 0;
+        int filesToDelete = 0;
+
+        System.out.println("File operations .......... : "+String.format("%,d", fileOperations.size()));
+
+        if (fileOperations.size() == 0) {
+            return;
+        }
+
+        if (verbose) {
+            System.out.println("--------------------------------");
+        }
         for (FileListEntry e : fileOperations) {
             if (verbose) {
                 System.out.println(e.toString());
             }
-            if (e.getOperation() == FileOperations.COPY || e.getOperation() == FileOperations.REPLACE) {
-                copySize += e.getSize();
-            } else if (e.getOperation() == FileOperations.DELETE) {
-                deleteSize += e.getSize();
+            if (!e.isDirectory()) {
+                if (e.getOperation() == FileOperations.COPY) {
+                    filesToCopy++;
+                    copySize += e.getSize();
+                } else if (e.getOperation() == FileOperations.REPLACE) {
+                    filesToReplace++;
+                    copySize += e.getSize();
+                } else if (e.getOperation() == FileOperations.DELETE) {
+                    filesToDelete++;
+                    deleteSize += e.getSize();
+                }
             }
         }
-
-        System.out.println("Bytes to copy to target    : "+String.format("%,d", copySize));
+        if (verbose) {
+            System.out.println("--------------------------------");
+        }
+        System.out.println("Files to copy ............ : "+filesToCopy);
+        System.out.println("Files to replace ......... : "+filesToReplace);
+        System.out.println("Files to delete .......... : "+filesToDelete);
+        System.out.println("Bytes to copy to target .. : "+String.format("%,d", copySize));
         System.out.println("Bytes to delete from target: "+String.format("%,d", deleteSize));
     }
 }
