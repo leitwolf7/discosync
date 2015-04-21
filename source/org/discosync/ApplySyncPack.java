@@ -76,8 +76,8 @@ public class ApplySyncPack implements IInvokable {
 
         int filesCopied = 0;
         int filesReplaced = 0;
-        long copySize = 0L;
         int filesDeleted = 0;
+        long copySize = 0L;
 
         // Collect directories during processing.
         List<FileListEntry> directoryOperations = new ArrayList<>();
@@ -171,9 +171,9 @@ public class ApplySyncPack implements IInvokable {
         }
 
         System.out.println("Apply of syncpack '"+syncPackDir+"' to directory '"+targetDir+"' finished.");
-        System.out.println("Files copied:   "+filesCopied);
-        System.out.println("Files replaced: "+filesReplaced);
-        System.out.println("Files deleted:  "+filesDeleted);
-        System.out.println("Bytes copied:   "+copySize);
+        System.out.println("Files copied  : "+String.format("%,d", filesCopied));
+        System.out.println("Files replaced: "+String.format("%,d", filesReplaced));
+        System.out.println("Files deleted : "+String.format("%,d", filesDeleted));
+        System.out.println("Bytes copied  : "+String.format("%,d", copySize));
     }
 }
