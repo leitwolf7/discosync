@@ -121,7 +121,7 @@ public class DiscoSync {
         invoker.invoke(cmd);
 
         long dura = System.currentTimeMillis() - start;
-        System.out.println("Duration: "+(dura/1000)+" seconds");
+        System.out.println("Duration: "+String.format("%,d", (dura/1000))+" seconds");
         System.out.println("Ready.");
     }
 }
