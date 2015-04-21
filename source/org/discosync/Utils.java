@@ -41,6 +41,7 @@ public class Utils {
                 // exists on target - is it a directory?
                 if (dstEntry.isDirectory()) {
                     // yes, already exists on target - KEEP
+                    dstFileMap.remove(dstEntry.getPath());
                 } else {
                     // dir exists on target, but is a FILE ! FIXME Remove file, create directory!
                     System.out.println("Internal Error: file name same as a directory name!");
@@ -100,5 +101,27 @@ public class Utils {
         }
         dirStream.close();
         return retval;
+    }
+
+    /**
+     * Visualize fileOperations.
+     */
+    public static void showSyncResult(List<FileListEntry> fileOperations, boolean verbose) {
+        long copySize = 0;
+        long deleteSize = 0;
+        System.out.println("Operations: "+fileOperations.size());
+        for (FileListEntry e : fileOperations) {
+            if (verbose) {
+                System.out.println(e.toString());
+            }
+            if (e.getOperation() == FileOperations.COPY || e.getOperation() == FileOperations.REPLACE) {
+                copySize += e.getSize();
+            } else if (e.getOperation() == FileOperations.DELETE) {
+                deleteSize += e.getSize();
+            }
+        }
+
+        System.out.println("Bytes to copy to target    : "+copySize);
+        System.out.println("Bytes to delete from target: "+deleteSize);
     }
 }

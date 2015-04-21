@@ -130,6 +130,14 @@ public class ApplySyncPack implements IInvokable {
 
         db.close();
 
+        // Sort directory list to ensure directories are deleted bottom-up (first /dir1/dir2, then /dir1)
+        Collections.sort(directoryOperations, new Comparator<FileListEntry>() {
+            @Override
+            public int compare(FileListEntry e1, FileListEntry e2) {
+                return e2.getPath().compareTo(e1.getPath().toString());
+            }
+        });
+
         // Now process directories - create and delete empty directories
         for (FileListEntry e : directoryOperations) {
 
@@ -146,7 +154,7 @@ public class ApplySyncPack implements IInvokable {
                 if (!Files.exists(targetPath)) {
                     System.out.println("Info: Directory to DELETE does not exist: "+targetPath.toAbsolutePath().toString());
 
-                } else if (Files.isDirectory(targetPath, LinkOption.NOFOLLOW_LINKS)) {
+                } else if (!Files.isDirectory(targetPath, LinkOption.NOFOLLOW_LINKS)) {
                     System.out.println("Info: Directory to DELETE is not a directory, but a file: "+targetPath.toAbsolutePath().toString());
 
                 } else if (!Utils.isDirectoryEmpty(targetPath)) {
