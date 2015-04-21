@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -32,11 +32,11 @@ import org.discosync.data.*;
 public class Utils {
 
     public static void doFileListEntryCompare(FileListEntry srcEntry, Map<String,FileListEntry> dstFileMap, List<FileListEntry> fileOperations) {
-        
+
         FileListEntry dstEntry = dstFileMap.get(srcEntry.getPath());
-        
+
         if (srcEntry.isDirectory()) {
-            
+
             if (dstEntry != null) {
                 // exists on target - is it a directory?
                 if (dstEntry.isDirectory()) {
@@ -50,9 +50,9 @@ public class Utils {
                 srcEntry.setOperation(FileOperations.COPY);
                 fileOperations.add(srcEntry);
             }
-            
+
         } else {
-            
+
             if (dstEntry != null) {
                 // file exists in dest, check size, ckSum
                 if (srcEntry.getSize() == dstEntry.getSize() && srcEntry.getChecksum() == dstEntry.getChecksum()) {
@@ -89,6 +89,16 @@ public class Utils {
                 return FileVisitResult.CONTINUE;
             }
 
-        });        
+        });
+    }
+
+    public static boolean isDirectoryEmpty(Path directory) throws IOException {
+        boolean retval = true;
+        DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory);
+        if (dirStream.iterator().hasNext()) {
+            retval = false;
+        }
+        dirStream.close();
+        return retval;
     }
 }
