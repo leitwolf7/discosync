@@ -55,6 +55,8 @@ public class CreateSyncPack implements IInvokable {
         String targetSyncInfo = cmd.getOptionValue("targetsyncinfo");
         String sourceSyncInfo = cmd.getOptionValue("sourcesyncinfo"); // optional
 
+        System.out.println("Create syncpack '"+syncPack+"' using target syncinfo '"+targetSyncInfo+"' and directory '"+baseDir+"'.");
+
         // create fileOperations using targetSyncInfo AND (baseDir or sourcesyncinfo)
         List<FileListEntry> fileOperations = null;
         CompareSyncInfo compareSyncInfo = new CompareSyncInfo();
