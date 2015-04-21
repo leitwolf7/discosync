@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -31,9 +31,9 @@ public class CompareSyncInfo implements IInvokable {
 
     @Override
     public boolean invoke(CommandLine cmd) throws SQLException, IOException {
-        
+
         boolean retval = true;
-        
+
         // <targetsyncinfo> , <sourcesyncinfo> or <basedir>
         if (!cmd.hasOption("targetsyncinfo")) {
             System.out.println("Syntax error: Command comparesyncinfo requires option targetsyncinfo.");
@@ -51,9 +51,9 @@ public class CompareSyncInfo implements IInvokable {
         if (!retval) {
             return false;
         }
-        
+
         String targetSyncInfo = cmd.getOptionValue("targetsyncinfo");
-        
+
         List<FileListEntry> fileOperations = null;
         if (cmd.hasOption("sourcesyncinfo")) {
             String sourceSyncInfo = cmd.getOptionValue("sourcesyncinfo");
@@ -62,9 +62,9 @@ public class CompareSyncInfo implements IInvokable {
             String basedir = cmd.getOptionValue("basedir");
             fileOperations = compareSyncInfoAndFiles(basedir, targetSyncInfo);
         }
-        
-        showSyncResult(fileOperations, cmd.hasOption("verbose"));
-        
+
+        Utils.showSyncResult(fileOperations, cmd.hasOption("verbose"));
+
         return true;
     }
 
@@ -72,16 +72,16 @@ public class CompareSyncInfo implements IInvokable {
      * Compare a target syncInfo database with a source baseDir.
      */
     public List<FileListEntry> compareSyncInfoAndFiles(String baseDir, String targetSyncName) throws SQLException, IOException {
-        
+
         FileListDatabase db = new FileListDatabase(targetSyncName);
         db.open();
         Map<String,FileListEntry> dstFileMap = db.retrieveFileList();
         db.close();
-        
+
         List<FileListEntry> fileOperations = new ArrayList<>();
-        
+
         new FileCheckSyncInfoScanner().scan(new File(baseDir), dstFileMap, fileOperations);
-        
+
         // all items still in dstFileMap should not be there -> DELETE
         for (FileListEntry e : dstFileMap.values()) {
             e.setOperation(FileOperations.DELETE);
@@ -90,20 +90,20 @@ public class CompareSyncInfo implements IInvokable {
 
         return fileOperations;
     }
-    
+
     /**
      * Compare two syncInfos.
      * @return fileOperations needed to make target the same as source
      */
     public List<FileListEntry> compareSyncInfo(String sourceSyncName, String targetSyncName) throws SQLException, IOException {
-        
+
         FileListDatabase dstDb = new FileListDatabase(targetSyncName);
         dstDb.open();
         Map<String,FileListEntry> dstFileMap = dstDb.retrieveFileList();
         dstDb.close();
-        
+
         List<FileListEntry> fileOperations = new ArrayList<>();
-        
+
         FileListDatabase srcDb = new FileListDatabase(sourceSyncName);
         srcDb.open();
         Iterator<FileListEntry> it = srcDb.getFileListEntryIterator();
@@ -112,35 +112,13 @@ public class CompareSyncInfo implements IInvokable {
             Utils.doFileListEntryCompare(srcEntry, dstFileMap, fileOperations);
         }
         srcDb.close();
-        
+
         // all items still in dstFileMap should not be there -> DELETE
         for (FileListEntry e : dstFileMap.values()) {
             e.setOperation(FileOperations.DELETE);
             fileOperations.add(e);
         }
-            
+
         return fileOperations;
-    }
-    
-    /**
-     * Visualize fileOperations.
-     */
-    protected void showSyncResult(List<FileListEntry> fileOperations, boolean verbose) {
-        long copySize = 0;
-        long deleteSize = 0;
-        System.out.println("Operations: "+fileOperations.size());
-        for (FileListEntry e : fileOperations) {
-            if (verbose) {
-                System.out.println(e.toString());
-            }
-            if (e.getOperation() == FileOperations.COPY || e.getOperation() == FileOperations.REPLACE) {
-                copySize += e.getSize();
-            } else if (e.getOperation() == FileOperations.DELETE) {
-                deleteSize += e.getSize();
-            }
-        }
-        
-        System.out.println("Bytes to copy to target    : "+copySize);
-        System.out.println("Bytes to delete from target: "+deleteSize);
     }
 }
