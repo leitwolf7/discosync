@@ -130,7 +130,7 @@ public class Utils {
     public static void showSyncResult(List<FileListEntry> fileOperations, boolean verbose) {
         long copySize = 0;
         long deleteSize = 0;
-        System.out.println("Operations: "+fileOperations.size());
+        System.out.println("Operations: "+String.format("%,d", fileOperations.size()));
         for (FileListEntry e : fileOperations) {
             if (verbose) {
                 System.out.println(e.toString());
@@ -142,7 +142,7 @@ public class Utils {
             }
         }
 
-        System.out.println("Bytes to copy to target    : "+copySize);
-        System.out.println("Bytes to delete from target: "+deleteSize);
+        System.out.println("Bytes to copy to target    : "+String.format("%,d", copySize));
+        System.out.println("Bytes to delete from target: "+String.format("%,d", deleteSize));
     }
 }

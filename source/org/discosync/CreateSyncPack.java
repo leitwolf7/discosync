@@ -68,6 +68,7 @@ public class CreateSyncPack implements IInvokable {
 
         Utils.showSyncResult(fileOperations, cmd.hasOption("verbose"));
 
+        System.out.println("Creating syncpack ...");
         createSyncPack(baseDir, fileOperations, syncPack);
 
         return true;

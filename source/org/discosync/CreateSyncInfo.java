@@ -49,8 +49,9 @@ public class CreateSyncInfo implements IInvokable {
         String baseDir = cmd.getOptionValue("basedir");
         String syncName = cmd.getOptionValue("syncinfo");
 
-        System.out.println("Create syncinfo '"+syncName+"' for directory' "+baseDir+"'.");
+        System.out.println("Create syncinfo '"+syncName+"' for directory '"+baseDir+"'.");
 
+        System.out.println("Scanning directory ...");
         createSyncInfo(baseDir, syncName);
 
         return true;
@@ -64,7 +65,11 @@ public class CreateSyncInfo implements IInvokable {
         db.open();
         db.createFileListTable();
 
-        new FileCreateSyncInfoScanner().scan(new File(baseDir), db);
+        FileCreateSyncInfoScanner scanner = new FileCreateSyncInfoScanner();
+        scanner.scan(new File(baseDir), db);
+
+        System.out.println("Processed files: "+String.format("%,d", scanner.getEntryCount()));
+        System.out.println("Processed bytes: "+String.format("%,d",scanner.getByteCount()));
 
         db.close();
     }
