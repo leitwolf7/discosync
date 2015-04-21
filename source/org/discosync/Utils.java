@@ -31,6 +31,14 @@ import org.discosync.data.*;
  */
 public class Utils {
 
+    /**
+     * Check if the srcEntry is in dstFileMap, and compare the entries.
+     * Can create a fileOperation that is added to the fileOperations list.
+     *
+     * @param srcEntry  source entry
+     * @param dstFileMap  map with files
+     * @param fileOperations list to add created file operations to
+     */
     public static void doFileListEntryCompare(FileListEntry srcEntry, Map<String,FileListEntry> dstFileMap, List<FileListEntry> fileOperations) {
 
         FileListEntry dstEntry = dstFileMap.get(srcEntry.getPath());
@@ -73,6 +81,11 @@ public class Utils {
         }
     }
 
+    /**
+     * Delete the directory recursively.
+     *
+     * @param directory  directory to delete
+     */
     public static void deleteDirectoryRecursively(Path directory) throws IOException {
         if (!Files.exists(directory)) {
             return;
@@ -89,10 +102,15 @@ public class Utils {
                 Files.delete(dir);
                 return FileVisitResult.CONTINUE;
             }
-
         });
     }
 
+    /**
+     * Check if the directory is empty.
+     *
+     * @param directory directory to check
+     * @return true when empty
+     */
     public static boolean isDirectoryEmpty(Path directory) throws IOException {
         boolean retval = true;
         DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory);
@@ -105,6 +123,9 @@ public class Utils {
 
     /**
      * Visualize fileOperations.
+     *
+     * @param fileOperations List of file operations
+     * @param verbose when true each operation is printed
      */
     public static void showSyncResult(List<FileListEntry> fileOperations, boolean verbose) {
         long copySize = 0;
