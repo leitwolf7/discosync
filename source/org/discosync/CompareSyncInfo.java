@@ -57,9 +57,16 @@ public class CompareSyncInfo implements IInvokable {
         List<FileListEntry> fileOperations = null;
         if (cmd.hasOption("sourcesyncinfo")) {
             String sourceSyncInfo = cmd.getOptionValue("sourcesyncinfo");
+
+            System.out.println("Compare target syncinfo '"+targetSyncInfo+"' to source syncinfo '"+sourceSyncInfo+"'.");
+
             fileOperations = compareSyncInfo(sourceSyncInfo, targetSyncInfo);
+
         } else if (cmd.hasOption("basedir")) {
             String basedir = cmd.getOptionValue("basedir");
+
+            System.out.println("Compare target syncinfo '"+targetSyncInfo+"' to directory '"+basedir+"'.");
+
             fileOperations = compareSyncInfoAndFiles(basedir, targetSyncInfo);
         }
 

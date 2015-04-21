@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@ import org.discosync.scanner.FileCreateSyncInfoScanner;
 public class CreateSyncInfo implements IInvokable {
 
     public boolean invoke(CommandLine cmd) throws SQLException, IOException {
-        
+
         boolean retval = true;
-        
+
         // <basedir>, <syncinfo>
         if (!cmd.hasOption("basedir")) {
             System.out.println("Syntax error: Command createsyncinfo requires option basedir.");
@@ -41,20 +41,21 @@ public class CreateSyncInfo implements IInvokable {
             System.out.println("Syntax error: Command createsyncinfo requires option syncinfo.");
             retval = false;
         }
-        
+
         if (!retval) {
             return false;
         }
-        
+
         String baseDir = cmd.getOptionValue("basedir");
         String syncName = cmd.getOptionValue("syncinfo");
-        
+
+        System.out.println("Create syncinfo '"+syncName+"' for directory' "+baseDir+"'.");
+
         createSyncInfo(baseDir, syncName);
-        
+
         return true;
     }
-    
-    
+
     /**
      * Scan a baseDir and create a full syncInfo database.
      */
@@ -62,9 +63,9 @@ public class CreateSyncInfo implements IInvokable {
         FileListDatabase db = new FileListDatabase(syncName);
         db.open();
         db.createFileListTable();
-        
+
         new FileCreateSyncInfoScanner().scan(new File(baseDir), db);
-        
+
         db.close();
     }
 }

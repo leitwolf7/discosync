@@ -51,6 +51,8 @@ public class ApplySyncPack implements IInvokable {
         String syncPackDir = cmd.getOptionValue("syncpack");
         String targetDir = cmd.getOptionValue("basedir");
 
+        System.out.println("Apply syncpack '"+syncPackDir+"' to directory '"+targetDir+"'.");
+
         applySyncPack(syncPackDir, targetDir);
 
         return true;
@@ -167,7 +169,7 @@ public class ApplySyncPack implements IInvokable {
             }
         }
 
-        System.out.println("Apply of SyncPack '"+syncPackDir+"' to directory '"+targetDir+"' finished.");
+        System.out.println("Apply of syncpack '"+syncPackDir+"' to directory '"+targetDir+"' finished.");
         System.out.println("Files copied:   "+filesCopied);
         System.out.println("Files replaced: "+filesReplaced);
         System.out.println("Files deleted:  "+filesDeleted);
