@@ -94,7 +94,7 @@ public class DiscoSync {
     private void run(String[] args) throws Exception {
 
         System.out.println();
-        System.out.println("DiscoSync - Copyright (C) 2015, 2015 leitwolf7 - Home: github.com, leitwolf7/discosync");
+        System.out.println("DiscoSync v0.4 beta (dev) - Copyright (C) 2015, 2015 leitwolf7 - Home: github.com, leitwolf7/discosync");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
         System.out.println("This is free software, and you are welcome to redistribute it under certain conditions.");
         System.out.println();
