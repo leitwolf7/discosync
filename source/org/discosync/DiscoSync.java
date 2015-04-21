@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -25,14 +25,14 @@ import org.apache.commons.cli.*;
  * Flow: createsyncinfo, comparesyncinfo, createsyncpack, applysyncpack
  */
 public class DiscoSync {
-    
+
     public DiscoSync() {
     }
-    
+
     public static void main(String[] args) throws Exception {
         new DiscoSync().run(args);
     }
-    
+
     protected Options getCmdlineOptions() {
 
         Options options = new Options();
@@ -42,20 +42,20 @@ public class DiscoSync {
         options.addOption("createsyncpack", false, "create a <syncpack> for <targetsyncinfo> using a <basedir> and optionally <sourcesyncinfo>."
                 +"when <sourcesyncinfo> is specified the process is faster, but it must be in sync with the <basedir> contents!");
         options.addOption("applysyncpack", false, "apply <syncpack> to <basedir>"); // FIXME: optional targetsyncinfo for pre-check!
-        
+
         options.addOption("basedir", true, "base directory");
         options.addOption("syncinfo", true, "sync info location");
-        
+
         options.addOption("sourcesyncinfo", true, "source sync info location directory");
         options.addOption("targetsyncinfo", true, "target sync info location directory");
-        
+
         options.addOption("syncpack", true, "sync pack location directory");
-        
+
         options.addOption("verbose", false, "verbose output");
 
         return options;
     }
-    
+
     /**
      * Ensure valid combinations, print errors.
      */
@@ -69,7 +69,7 @@ public class DiscoSync {
             System.out.println("Syntax error: One single command of createsyncinfo, comparesyncinfo, createsyncpack or applysyncpack must be specified.");
             return null;
         }
-        
+
         if (cmd.hasOption("createsyncinfo")) {
             return new CreateSyncInfo();
         }
@@ -82,26 +82,27 @@ public class DiscoSync {
         if (cmd.hasOption("applysyncpack")) {
             return new ApplySyncPack();
         }
-        
+
         System.out.println("evalCmdline: Internal error.");
         return null;
     }
-    
+
     public void printUsage(Options options) {
         new HelpFormatter().printHelp("DiscoSync", options);
     }
-    
+
     private void run(String[] args) throws Exception {
-        
-        System.out.println("DiscoSync - Copyright (C) 2015, 2015 leitwolf7 - Home: github.com, leitwolf7/discosync");
+
+        System.out.println();
+        System.out.println("DiscoSync v0.4 beta (dev) - Copyright (C) 2015, 2015 leitwolf7 - Home: github.com, leitwolf7/discosync");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
         System.out.println("This is free software, and you are welcome to redistribute it under certain conditions.");
         System.out.println();
-        
+
         Options cmdlineOpts = getCmdlineOptions();
-        
+
         CommandLineParser parser = new GnuParser();
-        
+
         CommandLine cmd = null;
         try {
             cmd = parser.parse(cmdlineOpts, args);
@@ -109,16 +110,16 @@ public class DiscoSync {
             System.err.println(e.getMessage());
             System.exit(4);
         }
-        
+
         IInvokable invoker = evalCmdline(cmd);
         if (invoker == null) {
             System.exit(4);
         }
 
         long start = System.currentTimeMillis();
-        
+
         invoker.invoke(cmd);
-        
+
         long dura = System.currentTimeMillis() - start;
         System.out.println("Duration: "+(dura/1000)+" seconds");
         System.out.println("Ready.");

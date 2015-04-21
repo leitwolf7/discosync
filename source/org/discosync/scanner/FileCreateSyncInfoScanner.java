@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -32,16 +32,25 @@ import org.discosync.data.FileListDatabase;
  */
 public class FileCreateSyncInfoScanner extends DirectoryWalker {
 
-    Adler32 adlerChecksum = new Adler32();
+    protected Adler32 adlerChecksum = new Adler32();
 
-    String baseDir = null;
-    int baseDirLength = -1;
-    FileListDatabase database = null;
+    protected String baseDir = null;
+    protected int baseDirLength = -1;
+    protected FileListDatabase database = null;
+
+    protected int entryCount = 0;
+    protected long byteCount = 0L;
 
     public FileCreateSyncInfoScanner() {
         super();
     }
 
+    /**
+     * Scan the directory, create FileLiszEntry for each file and directory and add it to the database.
+     *
+     * @param startDirectory  base directory
+     * @param db database to add the entries to
+     */
     public void scan(File startDirectory, FileListDatabase db) throws IOException {
 
         baseDir = startDirectory.getAbsolutePath();
@@ -51,10 +60,23 @@ public class FileCreateSyncInfoScanner extends DirectoryWalker {
         walk(startDirectory, null);
     }
 
+    @Override
     protected boolean handleDirectory(File directory, int depth, Collection results) {
+
+        // remove baseDir part
+        String relativeName = directory.getAbsolutePath().substring(baseDirLength);
+
+        try {
+            database.insertDirectory(relativeName);
+            entryCount++;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 
+    @Override
     protected void handleFile(File file, int depth, Collection results) {
 
         long checksum = -1;
@@ -74,9 +96,26 @@ public class FileCreateSyncInfoScanner extends DirectoryWalker {
 
         try {
             database.insertFile(relativeName, checksum, size);
+            entryCount++;
+            byteCount += size;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        // System.out.println("File: "+relativeName+"; checksum="+checksum+"; size="+size);
+    }
+
+    /**
+     * Entry count is set after the scanner finished.
+     * @return number of entries added to database
+     */
+    public int getEntryCount() {
+        return entryCount;
+    }
+
+    /**
+     * Byte count is set after the scanner finished.
+     * @return the number of processed bytes
+     */
+    public long getByteCount() {
+        return byteCount;
     }
 }

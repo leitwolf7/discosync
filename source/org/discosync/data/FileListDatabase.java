@@ -32,6 +32,18 @@ public class FileListDatabase {
     protected Statement stmt;
     protected PreparedStatement insertStatement = null;
 
+    protected final String SQL_DROP = "DROP TABLE filelist IF EXISTS";
+    protected final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS filelist "
+            + "  (filepath        VARCHAR(265),"
+            + "   isdirectory     BOOLEAN,"
+            + "   checksum        BIGINT,"
+            + "   size            BIGINT)";
+    
+    protected final String SQL_INSERT = "INSERT INTO filelist "
+    		+ "(filepath,isdirectory,checksum,size) VALUES (?,?,?,?)";
+
+    protected final String SQL_SELECT = "SELECT filepath,isdirectory,checksum,size FROM filelist";
+    
     public FileListDatabase(String name) {
         this.name = name;
     }
@@ -67,41 +79,40 @@ public class FileListDatabase {
     }
     
     public void createFileListTable() throws SQLException {
-        String sqlDrop = "DROP TABLE filelist IF EXISTS";
-        
-        stmt.execute(sqlDrop);
-        
-        String sqlCreate = "CREATE TABLE IF NOT EXISTS filelist "
-                + "  (filepath        VARCHAR(265),"
-                + "   checksum        BIGINT,"
-                + "   size            BIGINT)";
-
-        stmt.execute(sqlCreate);
+        stmt.execute(SQL_DROP);
+        stmt.execute(SQL_CREATE);
     }
     
     public void insertFile(String path, long checksum, long size) throws SQLException {
         PreparedStatement insertStmt = getInsertStatement();
         insertStmt.setObject(1, path);
-        insertStmt.setObject(2, checksum);
-        insertStmt.setObject(3, size);
+        insertStmt.setObject(2, Boolean.FALSE);
+        insertStmt.setObject(3, checksum);
+        insertStmt.setObject(4, size);
         insertStmt.executeUpdate();
     }
     
-    private PreparedStatement getInsertStatement() throws SQLException {
+    public void insertDirectory(String path) throws SQLException {
+        PreparedStatement insertStmt = getInsertStatement();
+        insertStmt.setObject(1, path);
+        insertStmt.setObject(2, Boolean.TRUE);
+        insertStmt.setObject(3, 0L);
+        insertStmt.setObject(4, 0L);
+        insertStmt.executeUpdate();
+    }
+    
+    protected PreparedStatement getInsertStatement() throws SQLException {
         if (insertStatement == null) {
-            insertStatement = stmt.getConnection().prepareStatement("INSERT INTO filelist (filepath,checksum,size) VALUES (?,?,?)");
+            insertStatement = stmt.getConnection().prepareStatement(SQL_INSERT);
         }
         return insertStatement;
     }
 
     public Map<String,FileListEntry> retrieveFileList() throws SQLException {
         Map<String,FileListEntry> fileMap = new HashMap<>();
-        ResultSet rs = stmt.executeQuery("SELECT filepath,checksum,size FROM filelist");
+        ResultSet rs = stmt.executeQuery(SQL_SELECT);
         while (rs.next()) {
-            String path = rs.getString(1);
-            long checksum = rs.getLong(2);
-            long size = rs.getLong(3);
-            FileListEntry e = new FileListEntry(path, checksum, size);
+            FileListEntry e = createFileListEntry(rs);
             fileMap.put(e.getPath(), e);
         }
         rs.close();
@@ -110,9 +121,24 @@ public class FileListDatabase {
     }
     
     public Iterator<FileListEntry> getFileListEntryIterator() throws SQLException {
-        ResultSet rs = stmt.executeQuery("SELECT filepath,checksum,size FROM filelist");
+        ResultSet rs = stmt.executeQuery(SQL_SELECT);
         FileListEntryIterator it = new FileListEntryIterator(rs);
         return it;
+    }
+    
+    protected FileListEntry createFileListEntry(ResultSet rs) throws SQLException {
+        final FileListEntry e;
+        
+        String path = rs.getString(1);
+        boolean isDirectory = rs.getBoolean(2);
+        if (isDirectory) {
+            e = new FileListEntry(path);
+        } else {
+            long checksum = rs.getLong(3);
+            long size = rs.getLong(4);
+            e = new FileListEntry(path, checksum, size);
+        }
+        return e;
     }
     
     protected class FileListEntryIterator implements Iterator<FileListEntry> {
@@ -135,12 +161,9 @@ public class FileListDatabase {
         public FileListEntry next() {
             FileListEntry entry = null;
             try {
-                String path = resultSet.getString(1);
-                long checksum = resultSet.getLong(2);
-                long size = resultSet.getLong(3);
-                entry = new FileListEntry(path, checksum, size);
-            } catch(SQLException ex) {
-                ex.printStackTrace();
+                entry = createFileListEntry(resultSet);
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
             
             // pos to next

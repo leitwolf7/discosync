@@ -56,55 +56,40 @@ public class FileCheckSyncInfoScanner extends DirectoryWalker {
     }
 
     protected boolean handleDirectory(File directory, int depth, Collection results) {
+        
+        // remove baseDir part
+        String relativeName = directory.getAbsolutePath().substring(baseDirLength);
+        
+        FileListEntry e = new FileListEntry(relativeName);
+        
+        Utils.doFileListEntryCompare(e, dstFileMap, fileOperations);
+        
         return true;
     }
 
     protected void handleFile(File file, int depth, Collection results) {
 
-        long size = file.length();
-
-        // remove baseDir part
-        String relativeName = file.getAbsolutePath().substring(baseDirLength);
-        
-        // check if we can avoid to generate the checksum
-        FileListEntry dstEntry = dstFileMap.get(relativeName);
-
-        if (dstEntry != null) {
-            // file exists in dest, check size, ckSum
-            if (size != dstEntry.getSize()) {
-                // file exists, but is size different -> REPLACE
-                // put an entry without checksum
-                FileListEntry e = new FileListEntry(relativeName, 0L, size);
-                e.setOperation(FileOperations.REPLACE);
-                fileOperations.add(e);
-                // remove processed entry
-                dstFileMap.remove(dstEntry.getPath());
-                
-                return;
-            } else {
-                // same size, we must generate the checksum
-            }
-        } else {
-            // file is missing in dest -> copy
-            // put an entry without checksum
-            FileListEntry e = new FileListEntry(relativeName, 0L, size);
-            e.setOperation(FileOperations.COPY);
-            fileOperations.add(e);
-            return;
-        }
-        
+    	// Note: here we could make processing faster when the current process is a compare
+    	//   of a syncinfo with a baseDir - avoid to compute the checksum in this case when 
+    	//   the size is different
+    	
         long checksum = -1;
+
+        adlerChecksum.reset();
+
         try {
-            adlerChecksum.reset();
             checksum = FileUtils.checksum(file, adlerChecksum).getValue();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
+        long size = file.length();
+
+        // remove baseDir part
+        String relativeName = file.getAbsolutePath().substring(baseDirLength);
+
         FileListEntry e = new FileListEntry(relativeName, checksum, size);
 
         Utils.doFileListEntryCompare(e, dstFileMap, fileOperations);
-
-        // System.out.println("File: "+relativeName+"; checksum="+checksum+"; size="+size);
     }
 }

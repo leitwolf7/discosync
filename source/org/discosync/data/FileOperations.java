@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -23,8 +23,22 @@ package org.discosync.data;
  * Created on 01.04.2015
  */
 public enum FileOperations {
+
     KEEP,
     COPY,
     REPLACE,
-    DELETE
+    DELETE;
+
+    private static int maxLen = -1;
+
+    public String toPadString() {
+
+        if (maxLen < 0) {
+            for (FileOperations op : FileOperations.values()) {
+                maxLen = Math.max(maxLen, op.toString().length());
+            }
+        }
+
+        return String.format("%1$-"+maxLen+"s", this);
+    }
 }

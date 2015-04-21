@@ -1,6 +1,6 @@
 /*
  * This file is part of DiscoSync (home: github.com, leitwolf7/discosync)
- * 
+ *
  * Copyright (C) 2015, 2015 leitwolf7
  *
  *  DiscoSync is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ public class CreateSyncPack implements IInvokable {
     @Override
     public boolean invoke(CommandLine cmd) throws SQLException, IOException {
         boolean retval = true;
-        
+
         // create a <syncpack> for <targetsyncinfo> using a <basedir> and optionally <sourcesyncinfo>
         if (!cmd.hasOption("syncpack")) {
             System.out.println("Syntax error: Command createsyncpack requires option syncpack.");
@@ -49,12 +49,14 @@ public class CreateSyncPack implements IInvokable {
         if (!retval) {
             return false;
         }
-        
+
         String syncPack = cmd.getOptionValue("syncpack");
         String baseDir = cmd.getOptionValue("basedir");
         String targetSyncInfo = cmd.getOptionValue("targetsyncinfo");
         String sourceSyncInfo = cmd.getOptionValue("sourcesyncinfo"); // optional
-        
+
+        System.out.println("Create syncpack '"+syncPack+"' using target syncinfo '"+targetSyncInfo+"' and directory '"+baseDir+"'.");
+
         // create fileOperations using targetSyncInfo AND (baseDir or sourcesyncinfo)
         List<FileListEntry> fileOperations = null;
         CompareSyncInfo compareSyncInfo = new CompareSyncInfo();
@@ -63,9 +65,12 @@ public class CreateSyncPack implements IInvokable {
         } else {
             fileOperations = compareSyncInfo.compareSyncInfoAndFiles(baseDir, targetSyncInfo);
         }
-        
+
+        Utils.showSyncResult(fileOperations, cmd.hasOption("verbose"));
+
+        System.out.println("Creating syncpack ...");
         createSyncPack(baseDir, fileOperations, syncPack);
-        
+
         return true;
     }
 
@@ -73,10 +78,10 @@ public class CreateSyncPack implements IInvokable {
      * Create a syncpack in syncPackDir, using the fileOperations and taking the files from baseDir.
      */
     protected void createSyncPack(String baseDir, List<FileListEntry> fileOperations, String syncPackDir) throws SQLException, IOException {
-        
+
         Path syncPackDirPath = Paths.get(syncPackDir);
         Files.createDirectories(syncPackDirPath);
-        
+
         // store file operations to database
         File fileOpDbFile = new File(syncPackDirPath.toFile(), "fileoperations");
         FileOperationDatabase db = new FileOperationDatabase(fileOpDbFile.getAbsolutePath());
@@ -84,7 +89,7 @@ public class CreateSyncPack implements IInvokable {
         db.createFileOperationTable();
         db.insertFileOperations(fileOperations);
         db.close();
-        
+
         // delete 'files' directory in syncpack and create the directory again
         Path targetBaseDir = Paths.get(syncPackDirPath.toAbsolutePath().toString(), "files");
         Utils.deleteDirectoryRecursively(targetBaseDir);
@@ -92,25 +97,29 @@ public class CreateSyncPack implements IInvokable {
             Files.createDirectories(targetBaseDir);
         }
         String targetBaseDirStr = targetBaseDir.toAbsolutePath().toString();
-        
+
         // copy all files that need a COPY or REPLACE to the syncpack
         for (FileListEntry e : fileOperations) {
-            
+
             if (e.getOperation() != FileOperations.COPY && e.getOperation() != FileOperations.REPLACE) {
                 continue;
             }
-            
+
+            // don't copy directories that should be created on target
+            if (e.isDirectory()) {
+                continue;
+            }
+
             String path = e.getPath();
 
             Path sourcePath = FileSystems.getDefault().getPath(baseDir, path);
-            
+
             Path targetPath = Paths.get(targetBaseDirStr, path);
             if (!Files.exists(targetPath.getParent())) {
                 Files.createDirectories(targetPath.getParent());
             }
-            
+
             Files.copy(sourcePath, targetPath);
         }
     }
-
 }
