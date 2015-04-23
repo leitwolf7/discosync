@@ -78,6 +78,7 @@ public class ApplySyncPack implements IInvokable {
         int filesReplaced = 0;
         int filesDeleted = 0;
         long copySize = 0L;
+        long deleteSize = 0L;
 
         // Collect directories during processing.
         List<FileListEntry> directoryOperations = new ArrayList<>();
@@ -125,6 +126,12 @@ public class ApplySyncPack implements IInvokable {
                 if (!Files.exists(targetPath)) {
                     System.out.println("Info: the file should exist: "+targetPath.toAbsolutePath().toString());
                 } else {
+                    long fileSize = Files.size(targetPath);
+                    if (fileSize != e.getSize()) {
+                        // show info, delete anyway
+                        System.out.println("Info: the file size is different: "+targetPath.toAbsolutePath().toString());
+                    }
+                    deleteSize += fileSize;
                     Files.delete(targetPath);
                     filesDeleted++;
                 }
@@ -175,5 +182,6 @@ public class ApplySyncPack implements IInvokable {
         System.out.println("Files replaced: "+String.format("%,d", filesReplaced));
         System.out.println("Files deleted : "+String.format("%,d", filesDeleted));
         System.out.println("Bytes copied  : "+String.format("%,d", copySize));
+        System.out.println("Bytes deleted : "+String.format("%,d", deleteSize));
     }
 }
